@@ -62,7 +62,7 @@
           $scope.B = 0;
 
           $scope.add = function() {
-            // Para agregar nuevos números a la lista de numeros es necesario
+            // Para agregar nuevos números a la lista de números es necesario
             // validar si lo que se esta ingresando es un número y si es un
             // número que no se encuentre en la lista de números
             // Tambien se debe agregar mensajes de alerta para los casos
@@ -117,7 +117,7 @@
                   // siempre se realize antes que la de los nodos
                   setTimeout(function() {
                     // De esta manera representamos la animación correspondiente
-                    // al proceso de ordenamientp
+                    // al proceso de ordenamiento
                     angular.element(elements[$scope.B])
                       .css({left: $scope.A*33 + 'px'});
                     angular.element(elements[$scope.A])
@@ -125,8 +125,7 @@
 
                     // Pero además es importante reflejar dicho ordenamiento 
                     // en la lista de elementos html ya que estos reflejan 
-                    // virtualmente las nuevas posiciones de los numeros en la 
-                    // lista de número que referencia a los elementos en la web
+                    // virtualmente las nuevas posiciones de los números
                     var swapElement = elements[$scope.A];
 
                     elements[$scope.A] = elements[$scope.B];
