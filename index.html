@@ -1,0 +1,184 @@
+<!doctype html>
+<html class="no-js" lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Ordenamiento de numeros</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <!-- Place favicon.ico in the root directory -->
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap@3.3.7/dist/css/bootstrap.min.css">
+    <style>
+      body { font-family: monospace; }
+      .form-control { 
+        display: inline-block;
+        width: 200px; 
+      }
+      .wrapper {
+        position: relative;
+        padding: 24px;
+      }
+      .numbers {
+        position: relative;
+        padding: 0;
+        margin: 0;
+        height: 32px;
+        list-style: none;
+      }
+      .numbers__item {
+        position: absolute;
+        width: 32px;
+        height: 32px;
+        line-height: 32px;
+        border: 1px solid #9c27b0;
+        text-align: center;
+        transition: .5s ease;
+      }
+      #pointer {
+        position: absolute;
+        bottom: 16px;
+        left: -9999px;
+
+        width: 0;
+        height: 0;
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-bottom: 8px solid red;
+
+        transition: .15s ease;
+      }
+    </style>
+    <script src="https://unpkg.com/angular@1.6.1/angular.min.js"></script>
+    <script>
+      angular
+        .module('app', [])
+        
+        .controller('orderController', function($scope) {
+          $scope.numbers = [];
+          $scope.numbersToAnim = [];
+          $scope.number = '';
+          $scope.A = 0;
+          $scope.B = 0;
+
+          $scope.add = function() {
+            // Para agregar nuevos números a la lista de numeros es necesario
+            // validar si lo que se esta ingresando es un número y si es un
+            // número que no se encuentre en la lista de números
+            // Tambien se debe agregar mensajes de alerta para los casos
+            // correspondientes ya mencionados anteriormente,
+            if ( angular.isNumber(+$scope.number) && !isNaN(+$scope.number) && $scope.number.length) {
+              if ( $scope.numbers.indexOf(+$scope.number) === -1 ) {
+                $scope.numbers.push(+$scope.number);
+              } else {
+                alert('No se aceptan números repetidos');
+              }
+            } else {
+              alert('Solo se aceptan números');
+            }
+
+            $scope.numbersToAnim = angular.copy($scope.numbers);
+            $scope.number = '';
+          };
+
+          $scope.sort = function() {
+            var swapped = false;
+            var noSwappedCounter = 0; 
+            var i = 0;
+            var elements = [];
+            var pointer = document.getElementById('pointer');
+            var maxCycle = $scope.numbersToAnim.length - 1;
+
+            angular.forEach(document.getElementsByClassName('numbers__item'), function(element) {
+              // Es necesario pasar los elementos a una lista debido a que los
+              // HTMLCollection son inmutables
+              this.push(element);
+            }, elements);
+
+            var delay = setInterval(function() {
+              // console.log('interval');
+              
+              swapped = false;
+              $scope.A = i;
+              $scope.B = i + 1;
+
+              angular.element(pointer)
+                .css({left: (35 + 33*$scope.A) + 'px'});
+
+              if ($scope.numbersToAnim[$scope.A] > $scope.numbersToAnim[$scope.B]) {
+                  var swap = $scope.numbersToAnim[$scope.A];
+
+                  $scope.numbersToAnim[$scope.A] = $scope.numbersToAnim[$scope.B];
+                  $scope.numbersToAnim[$scope.B] = swap;
+
+                  // Es necesario agregar un pequeño delay entre la animación
+                  // del puntero y la animación de los nodos para que no se 
+                  // traslapen ya que es necesario que la animación del puntero
+                  // siempre se realize antes que la de los nodos
+                  setTimeout(function() {
+                    // De esta manera representamos la animación correspondiente
+                    // al proceso de ordenamientp
+                    angular.element(elements[$scope.B])
+                      .css({left: $scope.A*33 + 'px'});
+                    angular.element(elements[$scope.A])
+                      .css({left: $scope.B*33 + 'px'}); 
+
+                    // Pero además es importante reflejar dicho ordenamiento 
+                    // en la lista de elementos html ya que estos reflejan 
+                    // virtualmente las nuevas posiciones de los numeros en la 
+                    // lista de número que referencia a los elementos en la web
+                    var swapElement = elements[$scope.A];
+
+                    elements[$scope.A] = elements[$scope.B];
+                    elements[$scope.B] = swapElement;
+                  }, 500);
+                  
+                  swapped = true;
+                  noSwappedCounter = 0;
+
+                  // console.log($scope.A + ' <- ' + $scope.B, $scope.B + ' <- ' + $scope.A);
+                  // console.log($scope.numbersToAnim);
+                  // console.log(elements);
+              } else {
+                noSwappedCounter++;
+              }
+
+              // console.log('swapped', swapped);
+              if (noSwappedCounter === maxCycle) {
+                // console.log('clear interval');
+                angular.element(pointer).css({left: '35px'});
+                clearInterval(delay);
+              }
+
+              i++;
+
+              if (i === maxCycle) {
+                // console.log('reset index');
+                i = 0;
+              }
+            }, 1e3 * 2);
+          };
+        })
+    </script>
+  </head>
+  <body ng-app='app'> 
+    <div ng-controller="orderController"> 
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12">
+            <h3>Numeros a ordenar</h3>
+            <div class="wrapper">
+              <ul class="numbers" style="width: {{numbers.length*33}}px">
+                <li style="left: {{$index*33}}px" class="numbers__item" ng-repeat="num in numbers">{{num}}</li>
+              </ul>
+              <div id="pointer" ng-show="numbers.length"></div>
+            </div>
+            <input class="form-control" type="text" ng-model="number">
+            <button class="btn btn-success" type="button" ng-click="add()">Add</button>
+            <button class="btn btn-primary" type="button" ng-click="sort()">Sort</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
