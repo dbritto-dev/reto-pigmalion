@@ -82,27 +82,28 @@
           };
 
           $scope.sort = function() {
-            var swapped = false;
-            var noSwappedCounter = 0; 
-            var i = 0;
+            var $elements = document.getElementsByClassName('numbers__item');
+            var $pointer = document.getElementById('pointer');
             var elements = [];
-            var pointer = document.getElementById('pointer');
-            var maxCycle = $scope.numbersToAnim.length - 1;
+            var sizeOfElements = $scope.numbersToAnim.length;
+            var maxOfComparisonsPerIteration = sizeOfElements - 1;
 
-            angular.forEach(document.getElementsByClassName('numbers__item'), function(element) {
-              // Es necesario pasar los elementos a una lista debido a que los
+            // Es necesario pasar los elementos a una lista debido a que los
               // HTMLCollection son inmutables
-              this.push(element);
-            }, elements);
+            for (var n = 0; n < sizeOfElements; n++) {
+              elements.push($elements[n]);
+            }
 
+            var swapped = false, i = 0;
             var delay = setInterval(function() {
-              // console.log('interval');
+              console.log('interval');
               
-              swapped = false;
               $scope.A = i;
               $scope.B = i + 1;
 
-              angular.element(pointer)
+              console.log($scope.A);
+
+              angular.element($pointer)
                 .css({left: (36 + 33*$scope.A) + 'px'});
 
               if ($scope.numbersToAnim[$scope.A] > $scope.numbersToAnim[$scope.B]) {
@@ -133,29 +134,27 @@
                   }, 500);
                   
                   swapped = true;
-                  noSwappedCounter = 0;
 
-                  // console.log($scope.A + ' <- ' + $scope.B, $scope.B + ' <- ' + $scope.A);
-                  // console.log($scope.numbersToAnim);
-                  // console.log(elements);
-              } else {
-                noSwappedCounter++;
-              }
-
-              // console.log('swapped', swapped);
-              if (noSwappedCounter === maxCycle) {
-                // console.log('clear interval');
-                angular.element(pointer).css({left: '36px'});
-                clearInterval(delay);
+                  console.log($scope.A + ' <- ' + $scope.B, $scope.B + ' <- ' + $scope.A);
               }
 
               i++;
 
-              if (i === maxCycle) {
-                // console.log('reset index');
+              if (i === maxOfComparisonsPerIteration) {
+                // Si se cumplio el numero maximo de comparaciones por iteracion
+                // y no ha habido cambios entonces se limpia el intervalo
+                if (!swapped) {
+                  angular.element($pointer).css({left: '36px'});
+                  clearInterval(delay);
+                }
+
+                // Se reinicia el indice y la variable cambio a falso
                 i = 0;
+                swapped = false;
               }
             }, 1e3 * 2);
+
+            console.log('Arreglo ordenado');
           };
         })
     </script>
